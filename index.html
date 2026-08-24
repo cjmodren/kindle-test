@@ -5,56 +5,77 @@
   <!-- Auto-refreshes the page every 15 minutes (900 seconds) -->
   <meta http-equiv="refresh" content="900">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Kindle Dashboard</title>
+  <title>Kindle Dashboard Landscape</title>
   <style>
-    /* Monochrome optimization for E-Ink */
     * {
       box-sizing: border-box;
       margin: 0;
       padding: 0;
     }
-    body {
+    
+    /* Lock body dimensions to prevent scrollbars when rotated */
+    html, body {
+      width: 100vw;
+      height: 100vh;
+      overflow: hidden;
       background-color: #ffffff;
       color: #000000;
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-      text-align: center;
+    }
+
+    /* Rotates portrait viewport 90 degrees clockwise for landscape viewing */
+    .landscape-container {
+      width: 100vh;
+      height: 100vw;
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%) rotate(90deg);
+      transform-origin: center center;
+
       display: flex;
       flex-direction: column;
       justify-content: space-between;
-      height: 100vh;
-      padding: 30px;
+      padding: 40px;
     }
+
     .top-section {
-      margin-top: 20px;
+      margin-top: 10px;
+      text-align: center;
     }
     .location {
-      font-size: 1.5rem;
-      letter-spacing: 2px;
+      font-size: 1.6rem;
+      letter-spacing: 3px;
       text-transform: uppercase;
       font-weight: bold;
     }
     .date {
-      font-size: 1.8rem;
-      margin-top: 10px;
+      font-size: 2rem;
+      margin-top: 5px;
       font-weight: 500;
+    }
+
+    /* Main middle layout split into left/right blocks */
+    .middle-section {
+      display: flex;
+      justify-content: space-around;
+      align-items: center;
+      margin: 10px 0;
     }
     .time {
       font-size: 6.5rem;
       font-weight: bold;
       line-height: 1;
-      margin: 20px 0;
     }
-    .divider {
-      border: none;
-      border-bottom: 4px solid #000000;
-      margin: 20px auto;
-      width: 80%;
+    .v-divider {
+      width: 4px;
+      height: 120px;
+      background-color: #000000;
     }
-    .weather-section {
+    .weather-box {
       display: flex;
-      justify-content: space-around;
       align-items: center;
-      margin-bottom: 20px;
+      gap: 20px;
     }
     .temp {
       font-size: 5rem;
@@ -62,10 +83,12 @@
     }
     .details {
       text-align: left;
-      font-size: 1.5rem;
-      line-height: 1.6;
+      font-size: 1.4rem;
+      line-height: 1.5;
     }
+
     .status {
+      text-align: center;
       font-size: 1rem;
       color: #333333;
     }
@@ -73,45 +96,44 @@
 </head>
 <body>
 
-  <div class="top-section">
-    <div class="location">Plant City, FL</div>
-    <div id="date" class="date">--</div>
-    <div id="time" class="time">--:--</div>
-  </div>
-
-  <hr class="divider">
-
-  <div class="weather-section">
-    <div id="temp" class="temp">--°F</div>
-    <div class="details">
-      <div id="condition">Loading...</div>
-      <div>Humidity: <span id="humidity">--</span>%</div>
-      <div>Wind: <span id="wind">--</span> mph</div>
+  <div class="landscape-container">
+    <div class="top-section">
+      <div class="location">Plant City, FL</div>
+      <div id="date" class="date">--</div>
     </div>
-  </div>
 
-  <div id="last-updated" class="status">Updating...</div>
+    <div class="middle-section">
+      <div id="time" class="time">--:--</div>
+      <div class="v-divider"></div>
+      <div class="weather-box">
+        <div id="temp" class="temp">--°F</div>
+        <div class="details">
+          <div id="condition">Loading...</div>
+          <div>Humidity: <span id="humidity">--</span>%</div>
+          <div>Wind: <span id="wind">--</span> mph</div>
+        </div>
+      </div>
+    </div>
+
+    <div id="last-updated" class="status">Updating...</div>
+  </div>
 
   <script>
     function updateClock() {
       var now = new Date();
-      
-      // Date string format: Monday, Aug 24
       var dateOptions = { weekday: 'long', month: 'short', day: 'numeric' };
       document.getElementById('date').innerText = now.toLocaleDateString('en-US', dateOptions);
 
-      // Time string format: 12-hour format
       var hours = now.getHours();
       var minutes = now.getMinutes();
       var ampm = hours >= 12 ? 'PM' : 'AM';
       hours = hours % 12;
-      hours = hours ? hours : 12; // '0' becomes '12'
+      hours = hours ? hours : 12;
       minutes = minutes < 10 ? '0' + minutes : minutes;
       
       document.getElementById('time').innerText = hours + ':' + minutes + ' ' + ampm;
     }
 
-    // WMO Weather interpretation codes
     function getWeatherCondition(code) {
       if (code === 0) return "Clear Sky";
       if (code === 1 || code === 2 || code === 3) return "Partly Cloudy";
@@ -124,7 +146,6 @@
     }
 
     function fetchWeather() {
-      // Plant City Coordinates: 28.0181, -82.1226
       var url = 'https://api.open-meteo.com/v1/forecast?latitude=28.0181&longitude=-82.1226&current=temperature_2m,relative_humidity_2m,weather_code,wind_speed_10m&temperature_unit=fahrenheit&wind_speed_unit=mph';
 
       var xhr = new XMLHttpRequest();
@@ -146,10 +167,9 @@
       xhr.send();
     }
 
-    // Initialize and run periodic updates
     updateClock();
     fetchWeather();
-    setInterval(updateClock, 10000); // Check time every 10 sec
+    setInterval(updateClock, 10000);
   </script>
 </body>
 </html>
